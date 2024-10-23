@@ -72,7 +72,7 @@ const SnakeLadder = () => {
 
   // Arrays of arrays of the various snake and ladder starting and ending points.
   const snakeStartTemplates = [[98, 94, 88, 64, 55, 50, 43, 27], [23, 30, 39, 47, 56, 71, 78, 86, 98]]
-  const snakeEndTemplates = [[98, 94, 88, 64, 55, 50, 43, 27], [3, 10, 20, 26, 36, 9, 24, 66, 79]]
+  const snakeEndTemplates = [[3,48,51,22,34,11,9,6], [3, 10, 20, 26, 36, 9, 24, 66, 79]]
   const ladderStartTemplates = [[5, 19, 28, 60, 66, 72], [13, 16, 28, 33, 42, 53, 62, 72, 85]]
   const ladderEndTemplates = [[26, 40, 54, 79, 87, 91], [27, 67, 32, 49, 63, 87, 80, 90, 95]]
 
@@ -176,7 +176,7 @@ const SnakeLadder = () => {
       <h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>
       <div className="flex items-center justify-center">
         <table>
-          <tbody className="max-w-7xl mx-auto md:w-[100vh] md:h-[80vh] " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
+          <tbody className="max-w-7xl mx-auto md:w-[100vh] md:h-[60vh] " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
 
 
             {
@@ -207,7 +207,7 @@ const SnakeLadder = () => {
                     }
 
                     return (
-                      <td className=" text-center lg:w-16 lg:h-16  bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
+                      <td className=" text-center h-4 lg:w-16 lg:h-16  bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
                         background: background
                       }}></td>
                     )
