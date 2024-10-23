@@ -12,6 +12,7 @@ import Red from './assets/ludoRed.png'
 import Blue from './assets/ludoBlue.png'
 import Green from './assets/ludoGreen.png'
 import Yellow from './assets/ludoYellow.png'
+import starface from './assets/starface.png'
 
 const SnakeLadder = () => {
 
@@ -52,7 +53,7 @@ const SnakeLadder = () => {
   const [players, setPlayers] = useState([])
 
   // state of the dice for displaying the image 
-  const [diceState, setDiceState] = useState(dice1)
+  const [diceState, setDiceState] = useState(starface)
 
   // stae of the dice result get from dice rolling algorith
   const [diceResult, setDiceResult] = useState();
@@ -70,16 +71,16 @@ const SnakeLadder = () => {
   const templates = [snakeladder, snakeladder2]
 
   // Arrays of arrays of the various snake and ladder starting and ending points.
-  const snakeStartTemplates = [[98, 94, 88, 64, 55, 50, 43, 27],[23,30,39,47,56,71,78,86,98]]
-  const snakeEndTemplates = [[98, 94, 88, 64, 55, 50, 43, 27],[3,10,20,26,36,9,24,66,79]]
-  const ladderStartTemplates = [[5, 19, 28, 60, 66, 72],[13,16,28,33,42,53,62,72,85]]
-  const ladderEndTemplates = [[26, 40, 54, 79, 87, 91],[27,67,32,49,63,87,80,90,95]]
+  const snakeStartTemplates = [[98, 94, 88, 64, 55, 50, 43, 27], [23, 30, 39, 47, 56, 71, 78, 86, 98]]
+  const snakeEndTemplates = [[98, 94, 88, 64, 55, 50, 43, 27], [3, 10, 20, 26, 36, 9, 24, 66, 79]]
+  const ladderStartTemplates = [[5, 19, 28, 60, 66, 72], [13, 16, 28, 33, 42, 53, 62, 72, 85]]
+  const ladderEndTemplates = [[26, 40, 54, 79, 87, 91], [27, 67, 32, 49, 63, 87, 80, 90, 95]]
 
   // selecte snake and ladders array out of all arrays on the basis of user input
-  const snakeStart = snakeStartTemplates[selectedTemplate]
-  const snakeEnd = snakeEndTemplates[selectedTemplate]
-  const ladderStart = ladderStartTemplates[selectedTemplate]
-  const ladderEnd = ladderEndTemplates[selectedTemplate]
+  const snakeStart = snakeStartTemplates[parseInt(selectedTemplate) - 1]
+  const snakeEnd = snakeEndTemplates[parseInt(selectedTemplate) - 1]
+  const ladderStart = ladderStartTemplates[parseInt(selectedTemplate) - 1]
+  const ladderEnd = ladderEndTemplates[parseInt(selectedTemplate) - 1]
 
   // colorName array to display the color on the scrren to visually identify whose turn is this.
   const colorsName = ["Red", "Blue", "Green", "Yellow"]
@@ -165,21 +166,22 @@ const SnakeLadder = () => {
       })
       // setCurrentPlayer((prevPlayer) => prevPlayer + 1)
       setDiceRolled(false)
+      setDiceState(starface)
     }
   }
   // grid arr function call
   const gridArr = grid(10, 10)
   return (
-    <div className="text-center w-full ">
-      <h1>Snake & Ladder Game</h1>
+    <div className="text-center min-h-screen w-full bg-gray-700">
+      <h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>
       <div className="flex items-center justify-center">
         <table>
-          <tbody className="max-w-7xl mx-auto " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
+          <tbody className="max-w-7xl mx-auto md:w-[100vh] md:h-[80vh] " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
 
 
             {
               gridArr.map((row, rowindex) => (
-                <tr className="text-center" key={rowindex}>
+                <tr className="text-center " key={rowindex}>
                   {row.map((col, colIndex) => {
 
                     // getting all the players on a particular cell by using filter method on array
@@ -205,7 +207,7 @@ const SnakeLadder = () => {
                     }
 
                     return (
-                      <td className=" text-center w-16 h-16 bg-contain bg-center bg-no-repeat" key={colIndex} onClick={() => handleCellClick(col)} style={{
+                      <td className=" text-center lg:w-16 lg:h-16  bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
                         background: background
                       }}></td>
                     )
@@ -216,45 +218,56 @@ const SnakeLadder = () => {
           </tbody>
         </table>
       </div>
-      <div className='absolute right-[80px] top-[320px]'>
+      <div className='xl:absolute right-[80px] top-[320px]' style={{right:gameStarted===true?"200px":"80px"}}>
         <div>
-          {
-            (
-              <div>
                 <div>
 
-                  <h1>{colorsName[currentPlayer - 1]}</h1>
-                  <div className='flex justify-start items-start'>
-                    <label> Select the template board</label>
-                    {/* // gritting the seletion frm the user to use the board template dynamically */}
-                    <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
-                      <option value="0">Select</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                    </select>
-                  </div>
-                  <label htmlFor="">Select the No. Of Players :  </label>
+                  <h1 className='text-2xl visible text-white h-10' style={{display:gameStarted?"flex":'none'}}>{colorsName[currentPlayer - 1]}</h1>
                 </div>
-                <div>
+          {!gameStarted&&(
+              <div className='flex flex-col items-center xl:mb-5 justify-center '>
+            
+                <div className='flex flex-col items-center xl:mb-4 justify-center'>
 
-                  {/* getiing the selection from user about no. players to play */}
-                  <select value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
-                    <option value="0">Select</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                  </select>
+                  <div className='flex gap-5 bg-blue-700 border-2 border-black p-1'>
+                    <div className='flex flex-col justify-start items-end '>
+                      <label className='text-2xl text-white '>Board's Template : </label>
+                      {/* // gritting the seletion frm the user to use the board template dynamically */}
+                      <label className='text-2xl text-white flex items-end '>No. Of Players :  </label>
+                    </div>
+
+
+
+                    <div className='flex flex-col'>
+                      <select className='text-2xl text-white bg-transparent outline-none ' value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+                        <option className='text-black' value="0">Select</option>
+                        <option className='text-black' value="1">1</option>
+                        <option className='text-black' value="2">2</option>
+                      </select>
+
+                      {/* getiing the selection from user about no. players to play */}
+                      <select className='text-2xl text-white bg-transparent outline-none' value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
+                        <option value="0">Select</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                      </select>
+
+                    </div>
+                  </div>
                 </div>
               </div>
 
             )
           }
         </div>
-        <img src={diceState} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
-        {/* <button onClick={() => handleDiceRoll()}>click here</button> */}
+        <div className='flex items-center justify-center '>
+          <img style={{display:gameStarted?'flex':"none", backgroundColor: "white", borderRadius: "15px" }} src={diceState} width={"100vw"} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
+          {/* <button onClick={() => handleDiceRoll()}>click here</button> */}
+        </div>
       </div>
       {/* button to handle the state of game started or not  */}
-      <button onClick={() => handleGameStarted()}>Click Here to Start the Game</button>
+      <button className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>
     </div>
   )
 }
