@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import game from './assets/game.png'
-import snakeladder from './assets/snake&ladder2.jpg'
+import React, { useState } from 'react'
+// import game from './assets/game.png'
+import snakeladder from './assets/snake&ladder.jpg'
+import snakeladder2 from './assets/snake&ladder2.jpg'
 import dice1 from './assets/dice1.png'
 import dice2 from './assets/dice2.png'
 import dice3 from './assets/dice3.png'
@@ -13,6 +14,7 @@ import Green from './assets/ludoGreen.png'
 import Yellow from './assets/ludoYellow.png'
 
 const SnakeLadder = () => {
+
 
   // grid function to create grid of 1 to 100 in the order which snake and the ladder board contains
   const grid = (rows, cols) => {
@@ -39,54 +41,84 @@ const SnakeLadder = () => {
 
   // intialising the states of the variable we used
   const [gameStarted, setGameStarted] = useState(false)
-  const [currentPlayer, setCurrentPlayer] = useState(1)
+
+  // current player state to identify whose turn 
+  const [currentPlayer, setCurrentPlayer] = useState()
+
+  // total number of players in game 
   const [numOfPlayers, setNumOfPlayers] = useState(0)
-  const [players, setPlayers]= useState([])
-  // const [playersAtSameCell,setPlayersAtSameCell] = useState([])
+
+  // state/postion of all players
+  const [players, setPlayers] = useState([])
+
+  // state of the dice for displaying the image 
   const [diceState, setDiceState] = useState(dice1)
-  const [diceResult, setDiceResult] = useState(1)
-  const [colors, setColors] = useState([Red,Blue,Green,Yellow])
-  const snakeStart = [98,94,88,64,55,50,43,27]
-  const snakeEnd = [3,48,51,22,34,11,9,6]
-  const ladderStart = [5,19,28,60,66,72]
-  const ladderEnd=[26,40,54,79,87,91]
+
+  // stae of the dice result get from dice rolling algorith
+  const [diceResult, setDiceResult] = useState();
+
+  // to identify dice rolled or not for a particular player
+  const [diceRolled, setDiceRolled] = useState(false)
+
+  // various colours to append the players
+  const [colors, setColors] = useState([Red, Blue, Green, Yellow])
+
+  //  state to manage the templae selected by user
+  const [selectedTemplate, setSelectedTemplate] = useState(1)
+
+  // various templates to render the various board on the basis of user input 
+  const templates = [snakeladder, snakeladder2]
+
+  // Arrays of arrays of the various snake and ladder starting and ending points.
+  const snakeStartTemplates = [[98, 94, 88, 64, 55, 50, 43, 27],[23,30,39,47,56,71,78,86,98]]
+  const snakeEndTemplates = [[98, 94, 88, 64, 55, 50, 43, 27],[3,10,20,26,36,9,24,66,79]]
+  const ladderStartTemplates = [[5, 19, 28, 60, 66, 72],[13,16,28,33,42,53,62,72,85]]
+  const ladderEndTemplates = [[26, 40, 54, 79, 87, 91],[27,67,32,49,63,87,80,90,95]]
+
+  // selecte snake and ladders array out of all arrays on the basis of user input
+  const snakeStart = snakeStartTemplates[selectedTemplate]
+  const snakeEnd = snakeEndTemplates[selectedTemplate]
+  const ladderStart = ladderStartTemplates[selectedTemplate]
+  const ladderEnd = ladderEndTemplates[selectedTemplate]
+
+  // colorName array to display the color on the scrren to visually identify whose turn is this.
+  const colorsName = ["Red", "Blue", "Green", "Yellow"]
 
 
   // dice roll handler function to control the players positon on the basis of the dice
   const handleDiceRoll = () => {
-    if(!gameStarted) return alert("Pleast click below to start the game thenafter roll the dice")
+    // if(!diceRolled) return;
+
+    setDiceRolled(true)
+
+    // giving a alert to the player if it rolls the dice without the game being started
+    if (!gameStarted) return alert("Pleast click below to start the game thenafter roll the dice")
+
+    // using Math function to access the reandom value between 1 to 6 
     const dice = Math.floor((Math.random() * 6) + 1)
-    // console.log(dice);
+
+    // setting the state of the dice to show the dice visually
     setDiceState(src[dice - 1])
+
+    // setting the dice result value we got from math function
     setDiceResult(dice)
 
-    // setting players postions
-    setPlayers((PrevPlayerPositions) => {
-      return PrevPlayerPositions.map((p,index)=>{
-        if(index===(currentPlayer-1)){
-          const newPosition = p.position + diceResult;
-          return{
-            ...p, position:newPosition>100?alert("we cannot go above 100"):newPosition
-          }
-        }
-        return p
-      })
-    })
-    setCurrentPlayer((prevPlayer) => (prevPlayer % numOfPlayers) + 1);
-    console.log(currentPlayer);
-    
+    // setting the palyer whose turn is next 
+    setCurrentPlayer((prevPlayer) => (prevPlayer % numOfPlayers) + 1 || 1);
+
+
   }
 
-  
-  // // grid.player.background = 'red'
-  // console.log(player);
 
-  const handleGameStarted = () =>{
-    if(numOfPlayers>0){
-      setPlayers(Array(numOfPlayers).fill(1).map((_,index)=>({position:1,color:colors[index]})))
+  // handle game started function to handle players states just after the game started
+  const handleGameStarted = () => {
+
+    // conditionlaly checking if no.of player is more than 0 and setting the initial states of all the players along with assiged colored button to it 
+
+    if (numOfPlayers > 0) {
+      setPlayers(Array(numOfPlayers).fill(1).map((_, index) => ({ position: 1, color: colors[index] })))
       setGameStarted(true)
-    }else{
-      
+    } else {
       alert("please select atleast two player to start the")
     }
   }
@@ -94,6 +126,47 @@ const SnakeLadder = () => {
   // Array of the dice Images which will be shown on the basis of the number we get
   let src = [dice1, dice2, dice3, dice4, dice5, dice6]
 
+
+  // handle cell click function to handle the states when get cliked on any cell ot the board
+  const handleCellClick = (col) => {
+    // giveing alert message if we click on the cell before rolling the dice 
+    if (!diceRolled) alert("please roll the dice to move")
+
+    else {
+      // conditinllyh checking if current players position is not equal to that particular cell and returning null for this case 
+      if (players[currentPlayer - 1].position !== col) return;
+
+
+      // setting players postion on the basis of the basis of the diceResult
+      setPlayers((PrevPlayerPositions) => {
+
+        return PrevPlayerPositions.map((p, index) => {
+          // calculating newpostion
+          const newPosition = p.position + diceResult;
+          // checking if the selected player is current player whose to be turn the dice 
+
+          if (index === (currentPlayer - 1)) {
+            // getting the index of the num matched to the cell for snake and lader
+            const snakeStartIndex = snakeStart.findIndex(position => position === newPosition)
+            const ladderStartIndex = ladderStart.findIndex(position => position === newPosition)
+            if (snakeStartIndex >= 0) {
+              // setting the new postion of the player match to thes snkae or ladder index
+              return { ...p, position: snakeEnd[snakeStartIndex] }
+            }
+            if (ladderStartIndex >= 0) {
+              return { ...p, position: ladderEnd[ladderStartIndex] }
+            }
+            return {
+              ...p, position: newPosition > 100 ? alert("we cannot go above 100") : newPosition
+            }
+          }
+          return p
+        })
+      })
+      // setCurrentPlayer((prevPlayer) => prevPlayer + 1)
+      setDiceRolled(false)
+    }
+  }
   // grid arr function call
   const gridArr = grid(10, 10)
   return (
@@ -101,47 +174,42 @@ const SnakeLadder = () => {
       <h1>Snake & Ladder Game</h1>
       <div className="flex items-center justify-center">
         <table>
-          <tbody className="max-w-7xl mx-auto " style={{ background: `url(${snakeladder})`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
+          <tbody className="max-w-7xl mx-auto " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
 
 
             {
               gridArr.map((row, rowindex) => (
                 <tr className="text-center" key={rowindex}>
                   {row.map((col, colIndex) => {
-                    const snake = snakeStart.findIndex(s=>s===col)
-                    if (snake !== -1) {
-                      setPlayers((prevPlayers) => 
-                        prevPlayers.map((p, index) => {
-                          if (index === (currentPlayer - 1)) {
-                            return {
-                              ...p,
-                              position: snakeEnd[snake], // Update position to snakeEnd
-                            };
-                          }
-                          return p;
-                        })
-                      );
-                    }
-                    const playerOnCell = players.filter(p=>p.position===col);
+
+                    // getting all the players on a particular cell by using filter method on array
+                    const playerOnCell = players.filter(p => p.position === col);
+
+
                     let background;
-                    if(playerOnCell.length>0){
-                      if(playerOnCell.length===1){
-                        background = `url('${playerOnCell[0].color}')  center/contain no-repeat`
-                      }else if(playerOnCell.length===2){
-                        background = `url(${playerOnCell[0].color}) no-repeat left / 50% 100% , url(${playerOnCell[1].color}) no-repeat right / 50% 100%`; 
+                    // settign the size of the bg on the basis of the no. of players present on the particular cell
+                    if (playerOnCell.length > 0) {
+                      if (playerOnCell.length === 1) {
+                        background = `url('${playerOnCell[0].color}')  center/contain no-repeat `
+                      } else if (playerOnCell.length === 2) {
+                        background = `url(${playerOnCell[0].color}) no-repeat left / 50% 100% , url(${playerOnCell[1].color}) no-repeat right / 50% 100%`;
                       }
-                      else if(playerOnCell.length===3){
+                      else if (playerOnCell.length === 3) {
                         background = `url(${playerOnCell[0].color}) no-repeat left / 33.33% 100%, url(${playerOnCell[1].color}) no-repeat center / 33.33% 100%, url(${playerOnCell[2].color}) no-repeat right / 33.33% 100%`
                       }
-                    }else{
+                      else if (playerOnCell.length === 4) {
+                        background = `url(${playerOnCell[0].color}) no-repeat left / 25% 100%, url(${playerOnCell[1].color}) no-repeat left 25% / 25% 100%, url(${playerOnCell[2].color}) no-repeat left 50% / 25% 100%, url(${playerOnCell[3].color}) no-repeat left 75% / 25% 100%`
+                      }
+                    } else {
                       background = 'transparent'
                     }
 
-                    return(
-                    <td className=" text-center w-16 h-16 bg-contain bg-center bg-no-repeat" key={colIndex} style={{
-                      background:background
-                    }}></td>
-                  )})}
+                    return (
+                      <td className=" text-center w-16 h-16 bg-contain bg-center bg-no-repeat" key={colIndex} onClick={() => handleCellClick(col)} style={{
+                        background: background
+                      }}></td>
+                    )
+                  })}
                 </tr>
               ))
             }
@@ -149,27 +217,44 @@ const SnakeLadder = () => {
         </table>
       </div>
       <div className='absolute right-[80px] top-[320px]'>
-      <div>
-        {
-          !gameStarted&&(
-            <div>
-              <label htmlFor="">Select the No. Of Players :  </label>
-              <select value={numOfPlayers} onChange={(e)=>setNumOfPlayers(parseInt(e.target.value))}>
-                <option value="0">Select</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </div>
-            
-          )
-        }
-      </div>
+        <div>
+          {
+            (
+              <div>
+                <div>
+
+                  <h1>{colorsName[currentPlayer - 1]}</h1>
+                  <div className='flex justify-start items-start'>
+                    <label> Select the template board</label>
+                    {/* // gritting the seletion frm the user to use the board template dynamically */}
+                    <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+                      <option value="0">Select</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                  </div>
+                  <label htmlFor="">Select the No. Of Players :  </label>
+                </div>
+                <div>
+
+                  {/* getiing the selection from user about no. players to play */}
+                  <select value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
+                    <option value="0">Select</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </div>
+              </div>
+
+            )
+          }
+        </div>
         <img src={diceState} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
         {/* <button onClick={() => handleDiceRoll()}>click here</button> */}
-    </div>
-       {/* button to handle the state of game started or not  */}
-      <button onClick={()=>handleGameStarted()}>Click Here to Start the Game</button>
+      </div>
+      {/* button to handle the state of game started or not  */}
+      <button onClick={() => handleGameStarted()}>Click Here to Start the Game</button>
     </div>
   )
 }
