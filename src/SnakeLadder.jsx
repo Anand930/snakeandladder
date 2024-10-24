@@ -44,7 +44,7 @@ const SnakeLadder = () => {
   const [gameStarted, setGameStarted] = useState(false)
 
   // current player state to identify whose turn 
-  const [currentPlayer, setCurrentPlayer] = useState()
+  const [currentPlayer, setCurrentPlayer] = useState(100)
 
   // total number of players in game 
   const [numOfPlayers, setNumOfPlayers] = useState(0)
@@ -143,7 +143,10 @@ const SnakeLadder = () => {
 
         return PrevPlayerPositions.map((p, index) => {
           // calculating newpostion
-          const newPosition = p.position + diceResult;
+          let newPosition = p.position + diceResult;
+          if(newPosition=100){
+            alert(`congratulation ${colorsName[players[currentPlayer-1]]  } wind`)
+          }
           // checking if the selected player is current player whose to be turn the dice 
 
           if (index === (currentPlayer - 1)) {
@@ -173,7 +176,7 @@ const SnakeLadder = () => {
   const gridArr = grid(10, 10)
   return (
     <div className="text-center min-h-screen w-full bg-gray-700">
-      <h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>
+      {gameStarted&&<h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>}
       <div className="flex items-center justify-center">
         <table>
           <tbody className="max-w-7xl mx-auto md:w-[100vh] md:h-[60vh] " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
@@ -206,7 +209,7 @@ const SnakeLadder = () => {
                       background = 'transparent'
                     }
 
-                    return (
+                    return (gameStarted&&
                       <td className=" text-center h-4 lg:w-16 lg:h-16  bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
                         background: background
                       }}></td>
@@ -218,9 +221,9 @@ const SnakeLadder = () => {
           </tbody>
         </table>
       </div>
-      <div className='xl:absolute right-[80px] top-[320px]' style={{right:gameStarted===true?"200px":"80px"}}>
+      <div className='absolute left-[60px] top-[350px]' style={{right:gameStarted===true?"200px":"80px"}}>
         <div>
-                <div>
+                <div className='absolute lg:-top-10 lg:-right-[104px] xl:right-[72px] xl:-top-10'>
 
                   <h1 className='text-2xl visible text-white h-10' style={{display:gameStarted?"flex":'none'}}>{colorsName[currentPlayer - 1]}</h1>
                 </div>
@@ -247,10 +250,10 @@ const SnakeLadder = () => {
 
                       {/* getiing the selection from user about no. players to play */}
                       <select className='text-2xl text-white bg-transparent outline-none' value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
-                        <option value="0">Select</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
+                        <option className='text-black' value="0">Select</option>
+                        <option className='text-black' value="2">2</option>
+                        <option className='text-black' value="3">3</option>
+                        <option className='text-black' value="4">4</option>
                       </select>
 
                     </div>
@@ -261,13 +264,13 @@ const SnakeLadder = () => {
             )
           }
         </div>
-        <div className='flex items-center justify-center '>
-          <img style={{display:gameStarted?'flex':"none", backgroundColor: "white", borderRadius: "15px" }} src={diceState} width={"100vw"} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
+        <div  className='flex items-center justify-center absolute lg:-right-28 xl:right-16 '>
+          <img style={{display:gameStarted?'block':"none", backgroundColor: "white", borderRadius: "15px"  }} src={diceState} width={"100vw"} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
           {/* <button onClick={() => handleDiceRoll()}>click here</button> */}
         </div>
       </div>
       {/* button to handle the state of game started or not  */}
-      <button className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>
+      {!gameStarted&&<button  className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>}
     </div>
   )
 }
