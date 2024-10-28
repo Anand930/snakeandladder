@@ -124,6 +124,11 @@ const SnakeLadder = () => {
               let newPosition = player.position + 1;
 
               // Check for ladder positions to automatically move to ladder end
+              if(newPosition===100&&i===diceResult-1){
+                alert(`congratulation ${colorsName[currentPlayer-1]} wins`)
+                players.pop(currentPlayer-1)
+                return;
+              }
               if (i === diceResult - 1) {
                 var ladderStartIndex = ladderStart.findIndex(pos => pos === newPosition);
                 var snakeStartIndex = snakeStart.findIndex(pos => pos === newPosition);
@@ -243,7 +248,7 @@ const SnakeLadder = () => {
 
               <div className='flex flex-col items-center xl:mb-4 justify-center'>
 
-                <div className=' absolute flex gap-5 bg-blue-700 border-2 border-black p-1'>
+                <div className=' absolute flex gap-5 bg-blue-700 border-2 border-black p-1 md:top-[-230px]'>
                   <div className='flex flex-col justify-start items-end '>
                     <label className='text-2xl text-white '>Board's Template : </label>
                     {/* // gritting the seletion frm the user to use the board template dynamically */}
@@ -281,7 +286,7 @@ const SnakeLadder = () => {
         </div>
       </div>
       {/* button to handle the state of game started or not  */}
-      {!gameStarted && <button className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>}
+      {!gameStarted && <button className='text-3xl text-white xl:mt-3 md:mt-28' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>}
     </div>
   )
 }
