@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 // import game from './assets/game.png'
 import snakeladder from './assets/snake&ladder.jpg'
 import snakeladder2 from './assets/snake&ladder2.jpg'
@@ -44,7 +44,7 @@ const SnakeLadder = () => {
   const [gameStarted, setGameStarted] = useState(false)
 
   // current player state to identify whose turn 
-  const [currentPlayer, setCurrentPlayer] = useState(100)
+  const [currentPlayer, setCurrentPlayer] = useState(1)
 
   // total number of players in game 
   const [numOfPlayers, setNumOfPlayers] = useState(0)
@@ -72,9 +72,13 @@ const SnakeLadder = () => {
 
   // Arrays of arrays of the various snake and ladder starting and ending points.
   const snakeStartTemplates = [[98, 94, 88, 64, 55, 50, 43, 27], [23, 30, 39, 47, 56, 71, 78, 86, 98]]
-  const snakeEndTemplates = [[3,48,51,22,34,11,9,6], [3, 10, 20, 26, 36, 9, 24, 66, 79]]
+  const snakeEndTemplates = [[3, 48, 51, 22, 34, 11, 9, 6], [3, 10, 20, 26, 36, 9, 24, 66, 79]]
   const ladderStartTemplates = [[5, 19, 28, 60, 66, 72], [13, 16, 28, 33, 42, 53, 62, 72, 85]]
   const ladderEndTemplates = [[26, 40, 54, 79, 87, 91], [27, 67, 32, 49, 63, 87, 80, 90, 95]]
+
+  // useEffect(()=>{
+  //     playerMove(currentPlayer, diceResult)
+  // },[currentPlayer, diceResult])
 
   // selecte snake and ladders array out of all arrays on the basis of user input
   const snakeStart = snakeStartTemplates[parseInt(selectedTemplate) - 1]
@@ -110,6 +114,36 @@ const SnakeLadder = () => {
 
   }
 
+  const playerMove = (currentPlayer, diceResult) => {
+    for (let i = 0; i < diceResult; i++) {
+      setTimeout(() => {
+        setPlayers((prevPlayer) => {
+          return prevPlayer.map((player, index) => {
+            if (index === currentPlayer - 1) {
+              // Increment position by 1 until diceResult is reached
+              let newPosition = player.position + 1;
+
+              // Check for ladder positions to automatically move to ladder end
+              if (i === diceResult - 1) {
+                var ladderStartIndex = ladderStart.findIndex(pos => pos === newPosition);
+                var snakeStartIndex = snakeStart.findIndex(pos => pos === newPosition);
+              }
+              if (ladderStartIndex >= 0) {
+                return { ...player, position: ladderEnd[ladderStartIndex] };
+              } else if (snakeStartIndex >= 0) {
+                return { ...player, position: snakeEnd[snakeStartIndex] };
+              }
+
+
+              return { ...player, position: player.position + 1 };
+            }
+            return player;
+          });
+        });
+      }, 500 * (i + 1));
+    }
+  };
+
 
   // handle game started function to handle players states just after the game started
   const handleGameStarted = () => {
@@ -131,42 +165,16 @@ const SnakeLadder = () => {
   // handle cell click function to handle the states when get cliked on any cell ot the board
   const handleCellClick = (col) => {
     // giveing alert message if we click on the cell before rolling the dice 
-    if (!diceRolled) alert("please roll the dice to move")
+    if (!diceRolled) return alert("please roll the dice to move");
 
     else {
       // conditinllyh checking if current players position is not equal to that particular cell and returning null for this case 
-      if (players[currentPlayer - 1].position !== col) return;
+      if (players[Number(currentPlayer) - 1].position !== Number(col)) return;
 
 
       // setting players postion on the basis of the basis of the diceResult
-      setPlayers((PrevPlayerPositions) => {
+      playerMove(currentPlayer, diceResult);
 
-        return PrevPlayerPositions.map((p, index) => {
-          // calculating newpostion
-          let newPosition = p.position + diceResult;
-          if(newPosition=100){
-            alert(`congratulation ${colorsName[players[currentPlayer-1]]  } wind`)
-          }
-          // checking if the selected player is current player whose to be turn the dice 
-
-          if (index === (currentPlayer - 1)) {
-            // getting the index of the num matched to the cell for snake and lader
-            const snakeStartIndex = snakeStart.findIndex(position => position === newPosition)
-            const ladderStartIndex = ladderStart.findIndex(position => position === newPosition)
-            if (snakeStartIndex >= 0) {
-              // setting the new postion of the player match to thes snkae or ladder index
-              return { ...p, position: snakeEnd[snakeStartIndex] }
-            }
-            if (ladderStartIndex >= 0) {
-              return { ...p, position: ladderEnd[ladderStartIndex] }
-            }
-            return {
-              ...p, position: newPosition > 100 ? alert("we cannot go above 100") : newPosition
-            }
-          }
-          return p
-        })
-      })
       // setCurrentPlayer((prevPlayer) => prevPlayer + 1)
       setDiceRolled(false)
       setDiceState(starface)
@@ -176,7 +184,7 @@ const SnakeLadder = () => {
   const gridArr = grid(10, 10)
   return (
     <div className="text-center min-h-screen w-full bg-gray-700">
-      {gameStarted&&<h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>}
+      {gameStarted && <h1 className='text-white text-2xl mb-1'>Snake & Ladder Game</h1>}
       <div className="flex items-center justify-center">
         <table>
           <tbody className="max-w-7xl mx-auto md:w-[100vh] md:h-[60vh] " style={{ background: `url(${templates[selectedTemplate - 1]}) no-repeat center/contain`, backgroundRepeat: 'no-repeat', backgroundPosition: "center", backgroundSize: "contain" }} >
@@ -194,23 +202,26 @@ const SnakeLadder = () => {
                     let background;
                     // settign the size of the bg on the basis of the no. of players present on the particular cell
                     if (playerOnCell.length > 0) {
-                      if (playerOnCell.length === 1) {
-                        background = `url('${playerOnCell[0].color}')  center/contain no-repeat `
-                      } else if (playerOnCell.length === 2) {
-                        background = `url(${playerOnCell[0].color}) no-repeat left / 50% 100% , url(${playerOnCell[1].color}) no-repeat right / 50% 100%`;
-                      }
-                      else if (playerOnCell.length === 3) {
-                        background = `url(${playerOnCell[0].color}) no-repeat left / 33.33% 100%, url(${playerOnCell[1].color}) no-repeat center / 33.33% 100%, url(${playerOnCell[2].color}) no-repeat right / 33.33% 100%`
-                      }
-                      else if (playerOnCell.length === 4) {
-                        background = `url(${playerOnCell[0].color}) no-repeat left / 25% 100%, url(${playerOnCell[1].color}) no-repeat left 25% / 25% 100%, url(${playerOnCell[2].color}) no-repeat left 50% / 25% 100%, url(${playerOnCell[3].color}) no-repeat left 75% / 25% 100%`
-                      }
+                      const backgrounds = playerOnCell.map((player, index) => {
+                        // Positioning the background images according to the number of players
+                        if (playerOnCell.length === 1) {
+                          return `url(${player.color}) no-repeat center / contain`;
+                        } else if (playerOnCell.length === 2) {
+                          return `url(${player.color}) no-repeat ${index === 0 ? 'left' : 'right'} / 50% 100%`;
+                        } else if (playerOnCell.length === 3) {
+                          return `url(${player.color}) no-repeat ${index === 0 ? 'center top' : index === 1 ? 'left bottom' : 'right bottom'} / 50% 50%`;
+                        } else if (playerOnCell.length === 4) {
+                          return `url(${player.color}) no-repeat ${index < 2 ? (index === 0 ? 'left top' : 'right top') : (index === 2 ? 'left bottom' : 'right bottom')} / 50% 50%`;
+                        }
+                        return '';
+                      });
+                      background = backgrounds.join(', '); // Combine all backgrounds with commas
                     } else {
-                      background = 'transparent'
+                      background = 'transparent';
                     }
-
-                    return (gameStarted&&
-                      <td className=" text-center h-4 lg:w-16 lg:h-16  bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
+                    
+                    return (gameStarted &&
+                      <td className=" text-center h-4 lg:w-16 lg:h-16   bg-contain bg-center bg-no-repeat border-2 border-black" key={colIndex} onClick={() => handleCellClick(col)} style={{
                         background: background
                       }}></td>
                     )
@@ -221,56 +232,56 @@ const SnakeLadder = () => {
           </tbody>
         </table>
       </div>
-      <div className='absolute left-[60px] top-[350px]' style={{right:gameStarted===true?"200px":"80px"}}>
+      <div className='absolute left-[60px] top-[350px]' style={{ right: gameStarted === true ? "200px" : "80px" }}>
         <div>
-                <div className='absolute lg:-top-10 lg:-right-[104px] xl:right-[72px] xl:-top-10'>
+          <div className='absolute lg:-top-10 lg:-right-[104px] xl:right-[72px] xl:-top-10'>
 
-                  <h1 className='text-2xl visible text-white h-10' style={{display:gameStarted?"flex":'none'}}>{colorsName[currentPlayer - 1]}</h1>
-                </div>
-          {!gameStarted&&(
-              <div className='flex flex-col items-center xl:mb-5 justify-center '>
-            
-                <div className='flex flex-col items-center xl:mb-4 justify-center'>
+            <h1 className='text-2xl visible text-white h-10' style={{ display: gameStarted ? "flex" : 'none' }}>{colorsName[currentPlayer - 1]}</h1>
+          </div>
+          {!gameStarted && (
+            <div className='flex flex-col items-center xl:mb-5 justify-center '>
 
-                  <div className='flex gap-5 bg-blue-700 border-2 border-black p-1'>
-                    <div className='flex flex-col justify-start items-end '>
-                      <label className='text-2xl text-white '>Board's Template : </label>
-                      {/* // gritting the seletion frm the user to use the board template dynamically */}
-                      <label className='text-2xl text-white flex items-end '>No. Of Players :  </label>
-                    </div>
+              <div className='flex flex-col items-center xl:mb-4 justify-center'>
+
+                <div className=' absolute flex gap-5 bg-blue-700 border-2 border-black p-1'>
+                  <div className='flex flex-col justify-start items-end '>
+                    <label className='text-2xl text-white '>Board's Template : </label>
+                    {/* // gritting the seletion frm the user to use the board template dynamically */}
+                    <label className='text-2xl text-white flex items-end '>No. Of Players :  </label>
+                  </div>
 
 
 
-                    <div className='flex flex-col'>
-                      <select className='text-2xl text-white bg-transparent outline-none ' value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
-                        <option className='text-black' value="0">Select</option>
-                        <option className='text-black' value="1">1</option>
-                        <option className='text-black' value="2">2</option>
-                      </select>
+                  <div className='flex flex-col'>
+                    <select className='text-2xl text-white bg-transparent outline-none ' value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+                      <option className='text-black' value="0">Select</option>
+                      <option className='text-black' value="1">1</option>
+                      <option className='text-black' value="2">2</option>
+                    </select>
 
-                      {/* getiing the selection from user about no. players to play */}
-                      <select className='text-2xl text-white bg-transparent outline-none' value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
-                        <option className='text-black' value="0">Select</option>
-                        <option className='text-black' value="2">2</option>
-                        <option className='text-black' value="3">3</option>
-                        <option className='text-black' value="4">4</option>
-                      </select>
+                    {/* getiing the selection from user about no. players to play */}
+                    <select className='text-2xl text-white bg-transparent outline-none' value={numOfPlayers} onChange={(e) => setNumOfPlayers(parseInt(e.target.value))}>
+                      <option className='text-black' value="0">Select</option>
+                      <option className='text-black' value="2">2</option>
+                      <option className='text-black' value="3">3</option>
+                      <option className='text-black' value="4">4</option>
+                    </select>
 
-                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-            )
+          )
           }
         </div>
-        <div  className='flex items-center justify-center absolute lg:-right-28 xl:right-16 '>
-          <img style={{display:gameStarted?'block':"none", backgroundColor: "white", borderRadius: "15px"  }} src={diceState} width={"100vw"} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
+        <div className='flex items-center justify-center absolute lg:-right-28 xl:right-16 '>
+          <img style={{ display: gameStarted ? 'block' : "none", backgroundColor: "white", borderRadius: "15px" }} src={diceState} width={"100vw"} alt="dice1" className='w-20 h-20 ' onClick={() => handleDiceRoll()} />
           {/* <button onClick={() => handleDiceRoll()}>click here</button> */}
         </div>
       </div>
       {/* button to handle the state of game started or not  */}
-      {!gameStarted&&<button  className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>}
+      {!gameStarted && <button className='text-3xl text-white xl:mt-3' onClick={() => handleGameStarted()}>Click Here to Start the Game</button>}
     </div>
   )
 }
